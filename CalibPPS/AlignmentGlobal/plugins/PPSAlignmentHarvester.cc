@@ -108,6 +108,7 @@ private:
   void yAlignment(DQMStore::IBooker &iBooker, DQMStore::IGetter &iGetter, const PPSAlignmentConfig &cfg, int seqPos);
 
   // ------------ other member data and methods ------------
+  static void writeCutPlot(TH2D *h, double a, double c, double si, double n_si, const std::string &label);
   static TH1D *getTH1DFromTGraphErrors(TGraphErrors *graph,
                                        std::string title = "",
                                        std::string labels = "",
@@ -197,7 +198,7 @@ void PPSAlignmentHarvester::fillDescriptions(edm::ConfigurationDescriptions &des
   desc.add<bool>("write_sqlite_results", false);
   desc.add<bool>("x_ali_rel_final_slope_fixed", true);
   desc.add<bool>("y_ali_final_slope_fixed", true);
-  desc.add<bool>("debug", true);
+  desc.add<bool>("debug", false);
 
   descriptions.addWithDefaultLabel(desc);
 }
@@ -296,6 +297,28 @@ void PPSAlignmentHarvester::dqmEndRun(DQMStore::IBooker &iBooker,
       poolDbService->writeOne(&finalResults, poolDbService->currentTime(), "CTPPSRPAlignmentCorrectionsDataRcd");
     } else {
       edm::LogWarning("PPS") << "Could not store the results in a DB object. PoolDBService not available.";
+    }
+  }
+
+  // if debug_, save nice-looking cut plots with the worker data in the debug ROOT file
+  if (debug_) {
+    TDirectory *cutsDir = debugFile_->mkdir("cuts");
+    for (const auto &sc : {cfg.sectorConfig45(), cfg.sectorConfig56()}) {
+      TDirectory *sectorDir = cutsDir->mkdir(sc.name_.c_str());
+
+      gDirectory = sectorDir->mkdir("cut_h");
+      auto *h2_cut_h_bef_monitor = iGetter.get(folder_ + "/worker/" + sc.name_ + "/cuts/cut_h/h2_cut_h_bef");
+      auto *h2_cut_h_aft_monitor = iGetter.get(folder_ + "/worker/" + sc.name_ + "/cuts/cut_h/h2_cut_h_aft");
+      writeCutPlot(
+          h2_cut_h_bef_monitor->getTH2D(), sc.cut_h_a_, sc.cut_h_c_, cfg.n_si(), sc.cut_h_si_, "canvas_before");
+      writeCutPlot(h2_cut_h_aft_monitor->getTH2D(), sc.cut_h_a_, sc.cut_h_c_, cfg.n_si(), sc.cut_h_si_, "canvas_after");
+
+      gDirectory = sectorDir->mkdir("cut_v");
+      auto *h2_cut_v_bef_monitor = iGetter.get(folder_ + "/worker/" + sc.name_ + "/cuts/cut_v/h2_cut_v_bef");
+      auto *h2_cut_v_aft_monitor = iGetter.get(folder_ + "/worker/" + sc.name_ + "/cuts/cut_v/h2_cut_v_aft");
+      writeCutPlot(
+          h2_cut_v_bef_monitor->getTH2D(), sc.cut_v_a_, sc.cut_v_c_, cfg.n_si(), sc.cut_v_si_, "canvas_before");
+      writeCutPlot(h2_cut_v_aft_monitor->getTH2D(), sc.cut_v_a_, sc.cut_v_c_, cfg.n_si(), sc.cut_v_si_, "canvas_after");
     }
   }
 }
@@ -974,6 +997,33 @@ void PPSAlignmentHarvester::yAlignment(DQMStore::IBooker &iBooker,
 }
 
 // -------------------------------- other methods --------------------------------
+
+void PPSAlignmentHarvester::writeCutPlot(TH2D *h, double a, double c, double n_si, double si, const std::string &label) {
+  TCanvas *canvas = new TCanvas();
+  canvas->SetName(label.c_str());
+  canvas->SetLogz(1);
+
+  h->Draw("colz");
+
+  double x_min = -30.;
+  double x_max = 30.;
+
+  TGraph *g_up = new TGraph();
+  g_up->SetName("g_up");
+  g_up->SetPoint(0, x_min, -a * x_min - c + n_si * si);
+  g_up->SetPoint(1, x_max, -a * x_max - c + n_si * si);
+  g_up->SetLineColor(1);
+  g_up->Draw("l");
+
+  TGraph *g_down = new TGraph();
+  g_down->SetName("g_down");
+  g_down->SetPoint(0, x_min, -a * x_min - c - n_si * si);
+  g_down->SetPoint(1, x_max, -a * x_max - c - n_si * si);
+  g_down->SetLineColor(1);
+  g_down->Draw("l");
+
+  canvas->Write();
+}
 
 // Points in TGraph should be sorted (TGraph::Sort())
 // if n, binWidth, or min is set to -1, method will find it on its own
