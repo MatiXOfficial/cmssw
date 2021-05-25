@@ -11,6 +11,7 @@ from Calibration.LumiAlCaRecoProducers.AlcaLumiPCCHarvester_cff import *
 from CalibTracker.SiPixelQuality.SiPixelStatusHarvester_cfi import *
 from CalibTracker.SiPixelQuality.DQMEventInfoSiPixelQuality_cff import *
 from CalibPPS.TimingCalibration.PPSTimingCalibrationHarvester_cff import *
+from CalibPPS.AlignmentGlobal.PPSAlignmentHarvester_cff import *
 
 from Calibration.TkAlCaRecoProducers.PCLMetadataWriter_cfi import *
 
@@ -222,6 +223,11 @@ ALCAHARVESTPPSTimingCalibration_dbOutput = cms.PSet(record = cms.string('PPSTimi
                                                     tag = cms.string('PPSDiamondTimingCalibration_pcl'),
                                                     timetype = cms.untracked.string('lumiid')
                                                     )
+ALCAHARVESTPPSAlignment = ppsAlignmentHarvester.clone()
+ALCAHARVESTPPSAlignment_metadata = cms.PSet(record = cms.untracked.string('CTPPSRPAlignmentCorrectionsDataRcd')) # change to CTPPSRPAli...
+ALCAHARVESTPPSAlignment_dbOutput = cms.PSet(record = cms.string('CTPPSRPAlignmentCorrectionsDataRcd'), # change to CTPPSRPAli...
+                                            tag = cms.string('CTPPSRPAlignment_real_pcl'),  # TODO: check tag naming, DONE
+                                            timetype = cms.unstracked.string('runnumber'))  # TODO: lumiid vs runnumber, DONE
 
 # define all the paths
 BeamSpotByRun  = cms.Path(ALCAHARVESTBeamSpotByRun)
@@ -238,6 +244,7 @@ SiStripGainsAAG = cms.Path(ALCAHARVESTSiStripGainsAAG)
 LumiPCC = cms.Path(ALCAHARVESTLumiPCC)
 SiPixelQuality = cms.Path(dqmEnvSiPixelQuality+ALCAHARVESTSiPixelQuality)#+siPixelPhase1DQMHarvester)
 PPSTimingCalibration = cms.Path(ALCAHARVESTPPSTimingCalibration)
+PPSAlignment = cms.Path(ALCAHARVESTPPSAlignment)
 
 ALCAHARVESTDQMSaveAndMetadataWriter = cms.Path(dqmSaver+pclMetadataWriter)
 
