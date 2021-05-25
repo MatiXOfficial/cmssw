@@ -224,10 +224,10 @@ ALCAHARVESTPPSTimingCalibration_dbOutput = cms.PSet(record = cms.string('PPSTimi
                                                     timetype = cms.untracked.string('lumiid')
                                                     )
 ALCAHARVESTPPSAlignment = ppsAlignmentHarvester.clone()
-ALCAHARVESTPPSAlignment_metadata = cms.PSet(record = cms.untracked.string('CTPPSRPAlignmentCorrectionsDataRcd')) # change to CTPPSRPAli...
-ALCAHARVESTPPSAlignment_dbOutput = cms.PSet(record = cms.string('CTPPSRPAlignmentCorrectionsDataRcd'), # change to CTPPSRPAli...
-                                            tag = cms.string('CTPPSRPAlignment_real_pcl'),  # TODO: check tag naming, DONE
-                                            timetype = cms.unstracked.string('runnumber'))  # TODO: lumiid vs runnumber, DONE
+ALCAHARVESTPPSAlignment_metadata = cms.PSet(record = cms.untracked.string('CTPPSRPAlignmentCorrectionsDataRcd'))
+ALCAHARVESTPPSAlignment_dbOutput = cms.PSet(record = cms.string('CTPPSRPAlignmentCorrectionsDataRcd'),
+                                            tag = cms.string('CTPPSRPAlignment_real_pcl'),
+                                            timetype = cms.unstracked.string('runnumber'))
 
 # define all the paths
 BeamSpotByRun  = cms.Path(ALCAHARVESTBeamSpotByRun)

@@ -32,12 +32,12 @@ hltPPSPerPotTrackFilter_45 = _filter.clone(
 hltPPSPerPotTrackFilter_56 = _filter.clone(
     pixelFilter = cms.VPSet(
         cms.PSet( # sector 56, near pot
-            detid = cms.uint32(2022703104),
+            detid = cms.uint32(2039480320),
             minTracks = cms.int32(1),
             maxTracks = cms.int32(1),
         ),
         cms.PSet( # sector 56, far pot
-            detid = cms.uint32(2023227392),  # TODO: check numbers, wrong!
+            detid = cms.uint32(2040004608),
             minTracks = cms.int32(1),
             maxTracks = cms.int32(1),
         ),
